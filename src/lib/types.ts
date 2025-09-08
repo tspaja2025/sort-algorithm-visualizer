@@ -1,0 +1,150 @@
+import { MouseEventHandler, PointerEventHandler } from 'react';
+
+export type SortElement = {
+  value: number;
+  access: boolean;
+};
+
+type ProgressIndicator = { access: number[] };
+export type SortGenerator = Generator<ProgressIndicator, void, unknown>;
+
+// Hit canvas
+interface HitCanvasOptions {
+    rgbToId?: (rgb: [number, number, number]) => number;
+    idToRgb?: (id: number) => [number, number, number];
+}
+export interface CreateHitCanvas {
+    (canvas: HTMLCanvasElement, contextSettings?: CanvasRenderingContext2DSettings, hitCanvasOptions?: HitCanvasOptions): HitCanvasRenderingContext2D;
+}
+export interface HitCanvasRenderingContext2D extends Omit<CanvasRenderingContext2D, 'canvas'> {
+    getLayerIdAt(x: number, y: number): number;
+    setCurrentLayerId: (id: number) => void;
+}
+
+// Canvas & Layer
+export type CanvasContext =
+  | CanvasRenderingContext2D
+  | HitCanvasRenderingContext2D;
+
+export type LayerEvents =
+  | 'click'
+  | 'contextmenu'
+  | 'dblclick'
+  | 'auxclick'
+  | 'mousedown'
+  | 'mouseenter'
+  | 'mouseleave'
+  | 'mousemove'
+  | 'mouseup'
+  | 'wheel'
+  | 'touchcancel'
+  | 'touchend'
+  | 'touchmove'
+  | 'touchstart'
+  | 'pointerenter'
+  | 'pointerleave'
+  | 'pointerdown'
+  | 'pointermove'
+  | 'pointerup'
+  | 'pointercancel';
+
+export type LayerEventHandler = `on${LayerEvents}`;
+
+type CanvasEvents =
+  | LayerEvents
+  | 'focus'
+  | 'blur'
+  | 'fullscreenchange'
+  | 'fullscreenerror'
+  | 'scroll'
+  | 'cut'
+  | 'copy'
+  | 'paste'
+  | 'keydown'
+  | 'keypress'
+  | 'keyup'
+  | 'mouseover'
+  | 'mouseout'
+  | 'select'
+  | 'drag'
+  | 'dragend'
+  | 'dragenter'
+  | 'dragstart'
+  | 'dragleave'
+  | 'dragover'
+  | 'drop'
+  | 'pointerover'
+  | 'pointerout'
+  | 'gotpointercapture'
+  | 'lostpointercapture';
+
+export type CanvasEventHandler = `on${CanvasEvents}`;
+
+export type CanvasEventHandlers = {
+  [key in CanvasEventHandler]?: (event: Event) => void;
+};
+
+export type CanvasResizeEvent = {
+  width: number;
+  height: number;
+  pixelRatio: number;
+};
+
+export type CanvasProps = {
+  width?: number;
+  height?: number;
+  pixelRatio?: number | 'auto';
+  class?: string;
+  style?: string;
+  autoplay?: boolean;
+  autoclear?: boolean;
+  layerEvents?: boolean;
+  onresize?: (detail: CanvasResizeEvent) => void;
+  contextSettings?: CanvasRenderingContext2DSettings;
+  children?: React.ReactNode;
+} & CanvasEventHandlers;
+
+export type CanvasConfig = {
+  width: number;
+  height: number;
+  pixelRatio: number;
+  autoplay: boolean;
+  autoclear: boolean;
+  layerEvents: boolean;
+  contextSettings?: CanvasRenderingContext2DSettings;
+  onresize?: (detail: CanvasResizeEvent) => void;
+  handlers: CanvasEventHandlers;
+};
+
+export type Render = (props: {
+  context: CanvasRenderingContext2D;
+  width: number;
+  height: number;
+  time: number;
+}) => void;
+
+export type LayerEvent = {
+  x: number;
+  y: number;
+  originalEvent: MouseEvent | TouchEvent;
+};
+
+export type LayerEventHandlers = {
+  [key in LayerEventHandler]?: (detail: LayerEvent) => void;
+};
+
+export type LayerProps = {
+  setup?: Render;
+  render: Render;
+} & LayerEventHandlers;
+
+declare global {
+  namespace svelteHTML {
+    interface HTMLAttributes<T extends EventTarget> {
+      'onlayer.mouseenter'?: MouseEventHandler<T> | undefined | null;
+      'onlayer.mouseleave'?: MouseEventHandler<T> | undefined | null;
+      'onlayer.pointerenter'?: PointerEventHandler<T> | undefined | null;
+      'onlayer.pointerleave'?: PointerEventHandler<T> | undefined | null;
+    }
+  }
+}
