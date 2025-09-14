@@ -52,18 +52,14 @@ function* mergeSort(
   }
 }
 
-const mergeSortStart = function* (
-  arr: number[],
-  l: number,
-  r: number
-): SortGenerator {
+function* mergeSortStart(arr: number[], l: number, r: number): SortGenerator {
   if (l < r) {
     const m = l + Math.floor((r - l) / 2);
     yield* mergeSortStart(arr, l, m);
     yield* mergeSortStart(arr, m + 1, r);
     yield* mergeSort(arr, l, m, r);
   }
-};
+}
 
 export function* merge(arr: number[]): SortGenerator {
   yield* mergeSortStart(arr, 0, arr.length - 1);

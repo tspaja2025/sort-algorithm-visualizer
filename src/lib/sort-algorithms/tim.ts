@@ -28,11 +28,7 @@ function* insertionSort(
   }
 }
 
-function* countRunAndMakeAscending(
-  arr: number[],
-  start: number,
-  n: number
-): SortGenerator<number> {
+function* countRunAndMakeAscending(arr: number[], start: number, n: number) {
   let runEnd = start + 1;
   if (runEnd === n) {
     return start;
