@@ -12,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { generateArray, shuffle } from '@/lib/randomized-array-generator';
 import { useStore } from '@/lib/store';
 import { algorithms } from '@/lib/sort-algorithms/index';
 import type { Algorithm, SortElement } from '@/lib/types';
