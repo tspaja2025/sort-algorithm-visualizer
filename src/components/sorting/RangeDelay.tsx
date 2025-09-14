@@ -4,7 +4,13 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { useCallback, useMemo, useState } from 'react';
 
-export function RangeDelay({ delay, setDelay }) {
+export function RangeDelay({
+  delay,
+  setDelayAction,
+}: {
+  delay: number;
+  setDelayAction: (value: number) => void;
+}) {
   const delayFactors: { max: number; factor: number; precise?: boolean }[] = [
     { max: 20, factor: 1 / 10, precise: true },
     { max: 30, factor: 1 / 5 },
@@ -34,7 +40,7 @@ export function RangeDelay({ delay, setDelay }) {
   const realDelay = useMemo(() => getRealDelay(delay), [delay, getRealDelay]);
 
   const handleDelayChange = (value: number[]) => {
-    setDelay(value[0]);
+    setDelayAction(value[0]);
   };
 
   return (

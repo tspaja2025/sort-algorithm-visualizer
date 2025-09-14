@@ -12,6 +12,16 @@ export function BarsRender({ bars }: { bars: SortElement[] }) {
     const context = canvas.getContext('2d');
     if (!context) return;
 
+    // Get actual display size
+    const displayWidth = canvas.clientWidth;
+    const displayHeight = canvas.clientHeight;
+
+    // Check if canvas needs resizing
+    if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+      canvas.width = displayWidth;
+      canvas.height = displayHeight;
+    }
+
     const { width, height } = canvas;
 
     // background

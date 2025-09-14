@@ -4,7 +4,15 @@ import { generateArray, shuffle } from '@/lib/randomized-array-generator';
 import { Button } from '@/components/ui/button';
 import { useStore } from '@/lib/store';
 
-export function ControlButtons({ size, step, reset }) {
+export function ControlButtons({
+  size,
+  stepAction,
+  resetAction,
+}: {
+  size: number;
+  stepAction: () => void;
+  resetAction: () => void;
+}) {
   const { arrayToSort, running, setRunning, setArrayToSort } = useStore();
 
   const start = () => {
@@ -14,13 +22,13 @@ export function ControlButtons({ size, step, reset }) {
   const reverse = () => {
     const newArray = [...arrayToSort].reverse();
     setArrayToSort(newArray);
-    reset();
+    resetAction();
   };
 
   const shuffleClick = () => {
     const newArray = shuffle([...arrayToSort]);
     setArrayToSort(newArray);
-    reset();
+    resetAction();
   };
 
   const oddsEvens = () => {
@@ -38,14 +46,14 @@ export function ControlButtons({ size, step, reset }) {
     const [odds, evens] = oddsEvens();
     const newArray = [...odds.reverse(), ...evens];
     setArrayToSort(newArray);
-    reset();
+    resetAction();
   };
 
   const mountain = () => {
     const [odds, evens] = oddsEvens();
     const newArray = [...odds, ...evens.reverse()];
     setArrayToSort(newArray);
-    reset();
+    resetAction();
   };
 
   return (
@@ -53,7 +61,7 @@ export function ControlButtons({ size, step, reset }) {
       <Button variant={running ? 'secondary' : 'default'} onClick={start}>
         {running ? 'Stop' : 'Start'}
       </Button>
-      <Button onClick={step}>Step</Button>
+      <Button onClick={stepAction}>Step</Button>
       <Button onClick={shuffleClick}>Shuffle</Button>
       <Button onClick={reverse}>Reverse</Button>
       <Button onClick={valley}>Valley</Button>

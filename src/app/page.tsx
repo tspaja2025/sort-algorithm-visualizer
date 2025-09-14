@@ -157,9 +157,9 @@ export default function Home() {
   // Memoize the array size component to prevent unnecessary re-renders
   const arraySizeComponent = useMemo(() => {
     return algorithm?.arraySizeComponent ? (
-      <algorithm.arraySizeComponent size={size} setSize={setSize} />
+      <algorithm.arraySizeComponent size={size} setSizeAction={setSize} />
     ) : (
-      <RangeArraySize size={size} setSize={setSize} />
+      <RangeArraySize size={size} setSizeAction={setSize} />
     );
   }, [algorithm, size]);
 
@@ -170,7 +170,7 @@ export default function Home() {
           <CardTitle>Algorithm Visualizer</CardTitle>
           <CardAction>
             <AlgorithmSelector
-              selectAlgorithm={selectAlgorithm}
+              selectAlgorithmAction={selectAlgorithm}
               selectedAlgorithm={algorithm}
             />
           </CardAction>
@@ -186,11 +186,11 @@ export default function Home() {
       <Card>
         <CardContent className="flex gap-2">
           <div className="flex-1">
-            <ControlButtons reset={reset} size={size} step={step} />
+            <ControlButtons resetAction={reset} size={size} stepAction={step} />
           </div>
           <div className="flex flex-1 flex-col gap-2">
             {arraySizeComponent}
-            <RangeDelay delay={delay} setDelay={setDelay} />
+            <RangeDelay delay={delay} setDelayAction={setDelay} />
           </div>
         </CardContent>
       </Card>

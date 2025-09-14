@@ -10,15 +10,22 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import React from 'react';
+import { Algorithm } from '@/lib/types';
 
-export function AlgorithmSelector({ selectAlgorithm, selectedAlgorithm }) {
+export function AlgorithmSelector({
+  selectAlgorithmAction,
+  selectedAlgorithm,
+}: {
+  selectAlgorithmAction: (algo: Algorithm) => void;
+  selectedAlgorithm: Algorithm | null;
+}) {
   // Flatten the algorithms array for easier lookup
   const allAlgorithms = algorithms.flat();
 
   const handleValueChange = (algorithmName: string) => {
     const algo = allAlgorithms.find((a) => a.name === algorithmName);
     if (algo) {
-      selectAlgorithm(algo);
+      selectAlgorithmAction(algo);
     }
   };
 

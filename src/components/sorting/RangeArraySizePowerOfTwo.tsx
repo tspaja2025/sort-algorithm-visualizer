@@ -4,7 +4,7 @@ import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
-export function RangeArraySizePowerOfTwo({ size }) {
+export function RangeArraySizePowerOfTwo({ size }: { size: number }) {
   const steps = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024];
 
   const { running } = useStore();

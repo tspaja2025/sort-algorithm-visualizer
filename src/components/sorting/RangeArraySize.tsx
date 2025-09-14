@@ -4,11 +4,17 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { useStore } from '@/lib/store';
 
-export function RangeArraySize({ size, setSize }) {
+export function RangeArraySize({
+  size,
+  setSizeAction,
+}: {
+  size: number;
+  setSizeAction: (value: number) => void;
+}) {
   const { running } = useStore();
 
   const handleSizeChange = (value: number[]) => {
-    setSize(value[0]);
+    setSizeAction(value[0]);
   };
 
   return (
