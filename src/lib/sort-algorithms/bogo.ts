@@ -1,30 +1,41 @@
 import type { SortGenerator } from '@/lib/types';
 
-function* isSorted(arr: number[]) {
+const MAX_ATTEMPTS = 20000;
+
+function* isSorted(arr: number[]): Generator<{ access: number[], comparison: number[] }, boolean> {
   for (let i = 1; i < arr.length; i++) {
-    yield { access: [i] };
+    yield { access: [i - 1, i], comparison: [i - 1, i] };
     if (arr[i] < arr[i - 1]) return false;
   }
   return true;
 }
 
-function* shuffle(arr: number[]) {
-  for (let i = 0; i < arr.length; i++) {
-    const ind = Math.floor(Math.random() * arr.length);
-    yield { access: [arr.length - i - 1, ind] };
-
-    const temp = arr[arr.length - i - 1];
-    arr[arr.length - i - 1] = arr[ind];
-    arr[ind] = temp;
+function* fisherYatesShuffle(arr: number[]): Generator<{ access: number[] }> {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    yield { access: [i, j] };
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
 }
 
-export function* bogo(a: number[]): SortGenerator {
-  let sorted = yield* isSorted(a);
+export function* bogo(arr: number[]): SortGenerator {
+  if (arr.length <= 1) return;
+  
+  let attempts = 0;
+  let sorted = yield* isSorted(arr);
+  
+  yield { access: [], stats: { attempts, sorted } };
 
-  while (!sorted) {
-    yield* shuffle(a);
+  while (!sorted && attempts < MAX_ATTEMPTS) {
+    attempts++;
+    yield* fisherYatesShuffle(arr);
+    sorted = yield* isSorted(arr);
+    yield { access: [], stats: { attempts, sorted } };
+  }
 
-    sorted = yield* isSorted(a);
+  if (attempts >= MAX_ATTEMPTS) {
+    yield { access: [], warning: `Maximum attempts (${MAX_ATTEMPTS}) reached` };
+  } else {
+    yield { access: [], message: `Sorted in ${attempts} attempts!` };
   }
 }

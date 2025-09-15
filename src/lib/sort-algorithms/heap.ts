@@ -1,43 +1,50 @@
 import type { SortGenerator } from '@/lib/types';
 
-function* heapify(arr: number[], N: number, i: number): SortGenerator {
-  let largest = i;
-  const l = 2 * i + 1;
-  const r = 2 * i + 2;
+function swap(arr: number[], i: number, j: number) {
+  [arr[i], arr[j]] = [arr[j], arr[i]];
+}
 
-  if (l < N && arr[l] > arr[largest]) {
-    yield { access: [l, largest] };
-    largest = l;
-  }
+function* heapify(arr: number[], n: number, i: number): SortGenerator {
+  while (true) {
+    let largest = i;
+    const l = 2 * i + 1;
+    const r = 2 * i + 2;
 
-  if (r < N && arr[r] > arr[largest]) {
-    yield { access: [r, largest] };
-    largest = r;
-  }
+    if (l < n) {
+      yield { access: [l, largest] };
+      if (arr[l] > arr[largest]) {
+        largest = l;
+      }
+    }
 
-  if (largest != i) {
+    if (r < n) {
+      yield { access: [r, largest] };
+      if (arr[r] > arr[largest]) {
+        largest = r;
+      }
+    }
+
+    if (largest === i) break;
+
     yield { access: [i, largest] };
-    const swap = arr[i];
-    arr[i] = arr[largest];
-    arr[largest] = swap;
+    swap(arr, i, largest);
 
-    yield* heapify(arr, N, largest);
+    i = largest; // continue sifting down
   }
 }
 
 export function* heap(arr: number[]): SortGenerator {
-  const N = arr.length;
+  const n = arr.length;
 
-  for (let i = Math.floor(N / 2) - 1; i >= 0; i--) {
-    yield* heapify(arr, N, i);
+  // Build max heap
+  for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+    yield* heapify(arr, n, i);
   }
 
-  for (let i = N - 1; i > 0; i--) {
+  // Extract elements one by one
+  for (let i = n - 1; i > 0; i--) {
     yield { access: [0, i] };
-
-    const temp = arr[0];
-    arr[0] = arr[i];
-    arr[i] = temp;
+    swap(arr, 0, i);
 
     yield* heapify(arr, i, 0);
   }

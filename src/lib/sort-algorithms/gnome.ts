@@ -2,19 +2,25 @@ import type { SortGenerator } from '@/lib/types';
 
 export function* gnome(arr: number[]): SortGenerator {
   const n = arr.length;
-  let index = 0;
+  if (n <= 1) return;
 
-  while (index < n) {
-    if (index == 0 || arr[index] >= arr[index - 1]) {
-      yield { access: [index] };
-      index++;
+  let pos = 0;
+  let lastUnsorted = n;
+
+  while (pos < lastUnsorted) {
+    if (pos === 0 || arr[pos] >= arr[pos - 1]) {
+      yield { access: [pos], comparison: pos > 0 ? [pos, pos - 1] : undefined };
+      pos++;
     } else {
-      yield { access: [index, index - 1] };
-      let temp = 0;
-      temp = arr[index];
-      arr[index] = arr[index - 1];
-      arr[index - 1] = temp;
-      index--;
+      yield { access: [pos, pos - 1], comparison: [pos, pos - 1], swap: true };
+      [arr[pos], arr[pos - 1]] = [arr[pos - 1], arr[pos]];
+      
+      // If we swap at the end, we can reduce the search range
+      if (pos === lastUnsorted - 1) {
+        lastUnsorted--;
+      }
+      
+      pos = Math.max(0, pos - 1);
     }
   }
 }

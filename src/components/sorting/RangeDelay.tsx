@@ -2,7 +2,7 @@
 
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 
 export function RangeDelay({
   delay,

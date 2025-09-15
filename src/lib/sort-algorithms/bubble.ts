@@ -1,23 +1,37 @@
 import type { SortGenerator } from '@/lib/types';
 
 export function* bubble(arr: number[]): SortGenerator {
-  let n = arr.length;
-  let swapped: boolean;
+  const n = arr.length;
+  if (n <= 1) return;
 
-  do {
-    swapped = false;
-    let newN = 0;
+  let lastUnsorted = n - 1;
+  let sorted = false;
+  let pass = 0;
 
-    for (let j = 0; j < n - 1; j++) {
-      yield { access: [j, j + 1] };
+  while (!sorted && lastUnsorted > 0) {
+    pass++;
+    sorted = true;
+    let lastSwap = 0;
 
-      if (arr[j] > arr[j + 1]) {
-        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
-        swapped = true;
-        newN = j + 1;
+    for (let i = 0; i < lastUnsorted; i++) {
+      yield { 
+        access: [i, i + 1], 
+        comparison: [i, i + 1],
+        stats: { pass, lastUnsorted }
+      };
+
+      if (arr[i] > arr[i + 1]) {
+        [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
+        sorted = false;
+        lastSwap = i;
       }
     }
 
-    n = newN;
-  } while (swapped && n > 1);
+    lastUnsorted = lastSwap;
+    
+    yield { 
+      access: [],
+      stats: { pass, lastUnsorted, sorted: sorted }
+    };
+  }
 }

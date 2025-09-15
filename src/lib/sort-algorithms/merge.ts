@@ -1,66 +1,97 @@
 import type { SortGenerator } from '@/lib/types';
 
+// Insertion sort for small subarrays
+function* insertionSort(arr: number[], l: number, r: number): SortGenerator {
+  for (let i = l + 1; i <= r; i++) {
+    const key = arr[i];
+    let j = i - 1;
+    while (j >= l) {
+      yield { access: [j, i] };
+      if (arr[j] > key) {
+        arr[j + 1] = arr[j];
+        yield { access: [j + 1], value: arr[j] };
+        j--;
+      } else {
+        break;
+      }
+    }
+    arr[j + 1] = key;
+    yield { access: [j + 1], value: key };
+  }
+}
+
+// Merge two sorted halves
 function* mergeSort(
   arr: number[],
+  temp: number[],
   l: number,
   m: number,
   r: number
 ): SortGenerator {
-  const n1 = m - l + 1;
-  const n2 = r - m;
-
-  const left = new Array(n1);
-  const right = new Array(n2);
-
-  for (let i = 0; i < n1; i++) {
-    left[i] = arr[l + i];
-  }
-  for (let j = 0; j < n2; j++) {
-    right[j] = arr[m + 1 + j];
-  }
-
-  let i = 0;
-
-  let j = 0;
-
+  let i = l;
+  let j = m + 1;
   let k = l;
 
-  while (i < n1 && j < n2) {
-    yield { access: [k] };
-    if (left[i] <= right[j]) {
-      arr[k] = left[i];
+
+  while (i <= m && j <= r) {
+    yield { access: [i, j] };
+    if (arr[i] <= arr[j]) {
+      temp[k] = arr[i];
+      yield { access: [k], value: arr[i] };
       i++;
     } else {
-      arr[k] = right[j];
+      temp[k] = arr[j];
+      yield { access: [k], value: arr[j] };
       j++;
     }
     k++;
   }
 
-  while (i < n1) {
-    arr[k] = left[i];
-    yield { access: [k] };
+
+  while (i <= m) {
+    temp[k] = arr[i];
+    yield { access: [k], value: arr[i] };
     i++;
     k++;
   }
 
-  while (j < n2) {
-    arr[k] = right[j];
-    yield { access: [k] };
+
+  while (j <= r) {
+    temp[k] = arr[j];
+    yield { access: [k], value: arr[j] };
     j++;
     k++;
   }
+
+
+  for (let t = l; t <= r; t++) {
+    arr[t] = temp[t];
+  }
 }
 
-function* mergeSortStart(arr: number[], l: number, r: number): SortGenerator {
+// Recursive merge sort with insertion sort fallback
+function* mergeSortStart(
+  arr: number[],
+  temp: number[],
+  l: number,
+  r: number
+): SortGenerator {
+  // Use insertion sort for small subarrays
+  if (r - l <= 16) {
+    yield* insertionSort(arr, l, r);
+    return;
+  }
+
+
   if (l < r) {
     const m = l + Math.floor((r - l) / 2);
-    yield* mergeSortStart(arr, l, m);
-    yield* mergeSortStart(arr, m + 1, r);
-    yield* mergeSort(arr, l, m, r);
+    yield* mergeSortStart(arr, temp, l, m);
+    yield* mergeSortStart(arr, temp, m + 1, r);
+    yield* mergeSort(arr, temp, l, m, r);
   }
 }
 
 export function* merge(arr: number[]): SortGenerator {
-  yield* mergeSortStart(arr, 0, arr.length - 1);
+  const temp = new Array(arr.length);
+  yield* mergeSortStart(arr, temp, 0, arr.length - 1);
 }

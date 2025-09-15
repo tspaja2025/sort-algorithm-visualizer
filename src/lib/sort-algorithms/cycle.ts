@@ -2,41 +2,62 @@ import type { SortGenerator } from '@/lib/types';
 
 export function* cycle(arr: number[]): SortGenerator {
   const n = arr.length;
+  
+  for (let cycleStart = 0; cycleStart < n - 1; cycleStart++) {
+    // Store the current item once
+    const currentItem = arr[cycleStart];
+    let pos = cycleStart;
 
-  for (let cycle_start = 0; cycle_start <= n - 2; cycle_start++) {
-    let item = arr[cycle_start];
-
-    let pos = cycle_start;
-    for (let i = cycle_start + 1; i < n; i++) {
-      yield { access: [cycle_start, i] };
-      if (arr[i] < item) pos++;
+    // Single pass to count smaller elements
+    for (let i = cycleStart + 1; i < n; i++) {
+      yield { access: [i], comparison: [i] };
+      if (arr[i] < currentItem) {
+        pos++;
+      }
     }
 
-    if (pos == cycle_start) continue;
-
-    while (item == arr[pos]) pos += 1;
-
-    if (pos != cycle_start) {
-      const temp = item;
-      item = arr[pos];
-      arr[pos] = temp;
+    // Skip if already in position
+    if (pos === cycleStart) {
+      continue;
     }
 
-    while (pos != cycle_start) {
-      pos = cycle_start;
+    // Skip duplicates efficiently
+    while (pos < n && currentItem === arr[pos]) {
+      pos++;
+    }
 
-      for (let i = cycle_start + 1; i < n; i++) {
-        yield { access: [cycle_start, i] };
-        if (arr[i] < item) pos += 1;
-      }
-
-      while (item == arr[pos]) pos += 1;
-
-      if (item != arr[pos]) {
-        const temp = item;
-        item = arr[pos];
-        arr[pos] = temp;
-      }
+    if (pos > cycleStart && pos < n) {
+      // Rotate items in the cycle
+      let item = currentItem;
+      let currentPos = pos;
+      
+      do {
+        // Store next item before overwriting
+        const nextItem = arr[currentPos];
+        arr[currentPos] = item;
+        yield { access: [currentPos], swap: true };
+        
+        item = nextItem;
+        currentPos = cycleStart;
+        
+        // Find new position for the current item
+        for (let i = cycleStart + 1; i < n; i++) {
+          yield { access: [i], comparison: [i] };
+          if (arr[i] < item) {
+            currentPos++;
+          }
+        }
+        
+        // Skip duplicates
+        while (currentPos < n && item === arr[currentPos]) {
+          currentPos++;
+        }
+        
+      } while (currentPos !== pos);
+      
+      // Place the last item
+      arr[pos] = item;
+      yield { access: [pos], swap: true };
     }
   }
 }
