@@ -4,36 +4,30 @@ function* getMax(arr: number[], n: number) {
   let mx = arr[0];
   for (let i = 1; i < n; i++) {
     yield { access: [i] };
-    if (arr[i] > mx) {
-      mx = arr[i];
-    }
+    if (arr[i] > mx) mx = arr[i];
   }
   return mx;
 }
 
-function* countSort(arr: number[], n: number, exp: number): SortGenerator {
+function* countSort(arr: number[], n: number, exp: number, count: number[]): SortGenerator {
   const output = new Array(n);
-  const count = new Array(10);
+  count.fill(0);
 
-  let i;
-  for (let i = 0; i < 10; i++) count[i] = 0;
-
-  for (i = 0; i < n; i++) {
-    const x = Math.floor(arr[i] / exp) % 10;
-    count[x]++;
+  for (let i = 0; i < n; i++) {
+    const digit = Math.floor(arr[i] / exp) % 10;
+    count[digit]++;
     yield { access: [i] };
   }
 
-  for (i = 1; i < 10; i++) count[i] += count[i - 1];
+  for (let i = 1; i < 10; i++) count[i] += count[i - 1];
 
-  for (i = n - 1; i >= 0; i--) {
-    const x = Math.floor(arr[i] / exp) % 10;
-    output[count[x] - 1] = arr[i];
-    count[x]--;
+  for (let i = n - 1; i >= 0; i--) {
+    const digit = Math.floor(arr[i] / exp) % 10;
+    output[--count[digit]] = arr[i];
     yield { access: [i] };
   }
 
-  for (i = 0; i < n; i++) {
+  for (let i = 0; i < n; i++) {
     arr[i] = output[i];
     yield { access: [i] };
   }
@@ -41,12 +35,17 @@ function* countSort(arr: number[], n: number, exp: number): SortGenerator {
 
 export function* radixLSD(arr: number[]): SortGenerator {
   const len = arr.length;
+  if (len <= 1) {
+    yield { access: [] };
+    return;
+  }
 
   const m = yield* getMax(arr, len);
+  const count = new Array(10);
 
   for (let exp = 1; Math.floor(m / exp) > 0; exp *= 10) {
     yield { access: [] };
-    yield* countSort(arr, len, exp);
+    yield* countSort(arr, len, exp, count);
     yield { access: [] };
   }
 }

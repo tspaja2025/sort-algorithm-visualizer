@@ -75,18 +75,19 @@ export default function Home() {
 
   // Memoize selectAlgorithm
   const selectAlgorithm = useCallback(
-    (algo: Algorithm, setSearchParams = true) => {
-      reset();
-      setAlgorithm({ ...algo, instance: algo.function(arrayToSort) });
+  (algo: Algorithm, setSearchParams = true) => {
+    reset();
+    // Create new algorithm instance with current array
+    setAlgorithm({ ...algo, instance: algo.function(arrayToSort) });
 
-      if (setSearchParams) {
-        const params = new URLSearchParams(searchParams.toString());
-        params.set('algorithm', algo.name.toLowerCase().replace(/ /g, '-'));
-        router.replace(`?${params.toString()}`, { scroll: false });
-      }
-    },
-    [arrayToSort, reset, searchParams, router]
-  );
+    if (setSearchParams) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('algorithm', algo.name.toLowerCase().replace(/ /g, '-'));
+      router.replace(`?${params.toString()}`, { scroll: false });
+    }
+  },
+  [arrayToSort, reset, searchParams, router]
+);
 
   // Initial setup effect - runs only once
   useEffect(() => {
@@ -114,10 +115,10 @@ export default function Home() {
 
   // Effect for size changes
   useEffect(() => {
-    if (size !== arrayToSort.length) {
-      regenerateArray();
-    }
-  }, [size, arrayToSort.length, regenerateArray]);
+  if (size !== arrayToSort.length) {
+    regenerateArray();
+  }
+}, [size, arrayToSort.length, regenerateArray]);
 
   // Main animation effect - fixed dependencies
   useEffect(() => {
@@ -156,12 +157,15 @@ export default function Home() {
 
   // Memoize the array size component to prevent unnecessary re-renders
   const arraySizeComponent = useMemo(() => {
-    return algorithm?.arraySizeComponent ? (
-      <algorithm.arraySizeComponent size={size} setSizeAction={setSize} />
-    ) : (
-      <RangeArraySize size={size} setSizeAction={setSize} />
-    );
-  }, [algorithm, size]);
+  return algorithm?.arraySizeComponent ? (
+    <algorithm.arraySizeComponent 
+      size={size} 
+      setSizeAction={setSize} 
+    />
+  ) : (
+    <RangeArraySize size={size} setSizeAction={setSize} />
+  );
+}, [algorithm, size]);
 
   return (
     <div className="grid h-screen grid-rows-[auto_1fr_auto] gap-2 p-4">
