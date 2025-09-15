@@ -32,7 +32,6 @@ function* mergeSort(
   let j = m + 1;
   let k = l;
 
-
   while (i <= m && j <= r) {
     yield { access: [i, j] };
     if (arr[i] <= arr[j]) {
@@ -47,7 +46,6 @@ function* mergeSort(
     k++;
   }
 
-
   while (i <= m) {
     temp[k] = arr[i];
     yield { access: [k], value: arr[i] };
@@ -55,14 +53,12 @@ function* mergeSort(
     k++;
   }
 
-
   while (j <= r) {
     temp[k] = arr[j];
     yield { access: [k], value: arr[j] };
     j++;
     k++;
   }
-
 
   for (let t = l; t <= r; t++) {
     arr[t] = temp[t];
@@ -81,7 +77,6 @@ function* mergeSortStart(
     yield* insertionSort(arr, l, r);
     return;
   }
-
 
   if (l < r) {
     const m = l + Math.floor((r - l) / 2);

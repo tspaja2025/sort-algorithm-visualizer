@@ -19,8 +19,10 @@ export function AlgorithmSelector({
   selectAlgorithmAction: (algo: Algorithm) => void;
   selectedAlgorithm: Algorithm | null;
 }) {
-  // Flatten the algorithms array for easier lookup
   const allAlgorithms = algorithms.flat();
+
+  // Provide a default selected algorithm if none is selected
+  const selectedAlgorithmName = selectedAlgorithm?.name || '';
 
   const handleValueChange = (algorithmName: string) => {
     const algo = allAlgorithms.find((a) => a.name === algorithmName);
@@ -30,7 +32,7 @@ export function AlgorithmSelector({
   };
 
   return (
-    <Select value={selectedAlgorithm?.name} onValueChange={handleValueChange}>
+    <Select value={selectedAlgorithmName} onValueChange={handleValueChange}>
       <SelectTrigger className={buttonVariants({ variant: 'outline' })}>
         <SelectValue placeholder="Select an Algorithm" />
       </SelectTrigger>

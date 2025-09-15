@@ -4,10 +4,10 @@ import { useStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
-export function RangeArraySizePowerOfTwo({ 
-  size, 
-  setSizeAction 
-}: { 
+export function RangeArraySizePowerOfTwo({
+  size,
+  setSizeAction,
+}: {
   size: number;
   setSizeAction: (value: number) => void;
 }) {
@@ -29,7 +29,9 @@ export function RangeArraySizePowerOfTwo({
     <div className="mb-2 w-full space-y-2">
       <Label className="flex items-center justify-between">
         <span>Array size</span>
-        <span className="text-sm text-muted-foreground">{currentSize} bars</span>
+        <span className="text-sm text-muted-foreground">
+          {currentSize} bars
+        </span>
       </Label>
 
       <div className="flex flex-wrap gap-1">

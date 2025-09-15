@@ -14,10 +14,10 @@ export function* bubble(arr: number[]): SortGenerator {
     let lastSwap = 0;
 
     for (let i = 0; i < lastUnsorted; i++) {
-      yield { 
-        access: [i, i + 1], 
+      yield {
+        access: [i, i + 1],
         comparison: [i, i + 1],
-        stats: { pass, lastUnsorted }
+        stats: { pass, lastUnsorted },
       };
 
       if (arr[i] > arr[i + 1]) {
@@ -28,10 +28,10 @@ export function* bubble(arr: number[]): SortGenerator {
     }
 
     lastUnsorted = lastSwap;
-    
-    yield { 
+
+    yield {
       access: [],
-      stats: { pass, lastUnsorted, sorted: sorted }
+      stats: { pass, lastUnsorted, sorted: sorted },
     };
   }
 }

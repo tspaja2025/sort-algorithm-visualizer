@@ -9,7 +9,12 @@ function* getMax(arr: number[], n: number) {
   return mx;
 }
 
-function* countSort(arr: number[], n: number, exp: number, count: number[]): SortGenerator {
+function* countSort(
+  arr: number[],
+  n: number,
+  exp: number,
+  count: number[]
+): SortGenerator {
   const output = new Array(n);
   count.fill(0);
 

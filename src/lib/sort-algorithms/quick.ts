@@ -5,7 +5,7 @@ const INSERTION_THRESHOLD = 16;
 // Median-of-three pivot selection
 function getPivot(items: number[], left: number, right: number): number {
   const mid = Math.floor((left + right) / 2);
-  
+
   // Sort the three values and return the median
   if (items[left] > items[mid]) {
     [items[left], items[mid]] = [items[mid], items[left]];
@@ -16,19 +16,19 @@ function getPivot(items: number[], left: number, right: number): number {
   if (items[mid] > items[right]) {
     [items[mid], items[right]] = [items[right], items[mid]];
   }
-  
+
   return items[mid];
 }
 
 function* insertionSortRange(
-  items: number[], 
-  left: number, 
+  items: number[],
+  left: number,
   right: number
 ): SortGenerator {
   for (let i = left + 1; i <= right; i++) {
     const key = items[i];
     let j = i - 1;
-    
+
     while (j >= left) {
       yield { access: [j, i] };
       if (items[j] <= key) break;
@@ -40,7 +40,11 @@ function* insertionSortRange(
   }
 }
 
-function* partition(items: number[], left: number, right: number): Generator<{ access: number[] }, number> {
+function* partition(
+  items: number[],
+  left: number,
+  right: number
+): Generator<{ access: number[] }, number> {
   const pivot = getPivot(items, left, right);
   let i = left - 1;
   let j = right + 1;
@@ -107,13 +111,13 @@ function* qc(items: number[], left: number, right: number): SortGenerator {
 
 export function* quick(arr: number[]): SortGenerator {
   if (arr.length <= 1) return;
-  
+
   // Shuffle the array to avoid worst-case scenarios
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
     yield { access: [i, j] };
   }
-  
+
   yield* qc(arr, 0, arr.length - 1);
 }

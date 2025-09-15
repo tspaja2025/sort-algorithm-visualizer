@@ -10,7 +10,7 @@ export function BarsRender({
   colors = {
     accessed: 'darkgreen',
     sorted: 'lime',
-    default: 'gray'
+    default: 'gray',
   },
   transitionSpeed = 0.2,
 }: BarsRenderProps) {
@@ -67,8 +67,7 @@ export function BarsRender({
 
         // Smooth transition using lerp
         const current = currentHeightsRef.current[i] ?? 0;
-        const newHeight =
-          current + (targetHeight - current) * transitionSpeed;
+        const newHeight = current + (targetHeight - current) * transitionSpeed;
         currentHeightsRef.current[i] = newHeight;
 
         context.fillStyle = getBarColor(bar, i);
@@ -95,5 +94,5 @@ export function BarsRender({
     };
   }, [bars, spaceWidth, backgroundColor, colors, transitionSpeed]);
 
-  return <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />
+  return <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />;
 }

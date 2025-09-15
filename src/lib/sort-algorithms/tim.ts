@@ -21,7 +21,7 @@ function* binaryInsertionSort(
     const temp = arr[i];
     let left = start;
     let right = i - 1;
-    
+
     while (left <= right) {
       const mid = Math.floor((left + right) / 2);
       yield { access: [i, mid] };
@@ -31,7 +31,7 @@ function* binaryInsertionSort(
         right = mid - 1;
       }
     }
-    
+
     for (let j = i; j > left; j--) {
       arr[j] = arr[j - 1];
       yield { access: [j, j - 1] };
@@ -43,7 +43,7 @@ function* binaryInsertionSort(
 
 function* countRunAndMakeAscending(arr: number[], start: number, n: number) {
   if (start >= n - 1) return start;
-  
+
   let runEnd = start + 1;
   yield { access: [start, runEnd] };
 
@@ -93,7 +93,9 @@ function* merge(
     yield { access: [mid + 1 + j] };
   }
 
-  let i = 0, j = 0, k = start;
+  let i = 0,
+    j = 0,
+    k = start;
 
   while (i < len1 && j < len2) {
     yield { access: [k] };

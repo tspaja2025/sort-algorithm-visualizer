@@ -49,14 +49,14 @@ export function* cocktail(arr: number[]): SortGenerator {
     // Forward pass
     for (let i = start; i < end; i++) {
       yield { access: [i, i + 1], comparison: [i, i + 1] };
-      
+
       if (arr[i] > arr[i + 1]) {
         [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
         swapped = true;
         lastSwap = i;
       }
     }
-    
+
     if (!swapped) break;
     end = lastSwap;
     swapped = false;
@@ -64,14 +64,14 @@ export function* cocktail(arr: number[]): SortGenerator {
     // Backward pass
     for (let i = end; i > start; i--) {
       yield { access: [i, i - 1], comparison: [i, i - 1] };
-      
+
       if (arr[i] < arr[i - 1]) {
         [arr[i], arr[i - 1]] = [arr[i - 1], arr[i]];
         swapped = true;
         lastSwap = i;
       }
     }
-    
+
     start = lastSwap;
   }
 }

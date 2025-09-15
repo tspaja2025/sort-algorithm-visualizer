@@ -89,7 +89,6 @@ function* getMax(arr: number[], n: number) {
   return mx;
 }
 
-
 function* countSortMSD(
   arr: number[],
   exp: number,
@@ -120,7 +119,11 @@ function* countSortMSD(
   }
 }
 
-function* insertionSortRange(arr: number[], start: number, end: number): SortGenerator {
+function* insertionSortRange(
+  arr: number[],
+  start: number,
+  end: number
+): SortGenerator {
   for (let i = start + 1; i <= end; i++) {
     const key = arr[i];
     let j = i - 1;
@@ -147,7 +150,8 @@ function* radixSortMSDUtil(
   if (start >= end || exp < 1) return;
 
   const n = end - start + 1;
-  if (n <= 10) { // Switch to insertion sort for small arrays
+  if (n <= 10) {
+    // Switch to insertion sort for small arrays
     yield* insertionSortRange(arr, start, end);
     return;
   }
@@ -172,7 +176,12 @@ function* radixSortMSDUtil(
     const bucketEnd = start + bucketStarts[i + 1] - 1;
 
     if (bucketEnd > bucketStart) {
-      yield* radixSortMSDUtil(arr, Math.floor(exp / 10), bucketStart, bucketEnd);
+      yield* radixSortMSDUtil(
+        arr,
+        Math.floor(exp / 10),
+        bucketStart,
+        bucketEnd
+      );
     }
   }
 }

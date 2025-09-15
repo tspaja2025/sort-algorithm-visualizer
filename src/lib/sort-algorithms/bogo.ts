@@ -2,7 +2,9 @@ import type { SortGenerator } from '@/lib/types';
 
 const MAX_ATTEMPTS = 20000;
 
-function* isSorted(arr: number[]): Generator<{ access: number[], comparison: number[] }, boolean> {
+function* isSorted(
+  arr: number[]
+): Generator<{ access: number[]; comparison: number[] }, boolean> {
   for (let i = 1; i < arr.length; i++) {
     yield { access: [i - 1, i], comparison: [i - 1, i] };
     if (arr[i] < arr[i - 1]) return false;
@@ -20,10 +22,10 @@ function* fisherYatesShuffle(arr: number[]): Generator<{ access: number[] }> {
 
 export function* bogo(arr: number[]): SortGenerator {
   if (arr.length <= 1) return;
-  
+
   let attempts = 0;
   let sorted = yield* isSorted(arr);
-  
+
   yield { access: [], stats: { attempts, sorted } };
 
   while (!sorted && attempts < MAX_ATTEMPTS) {
