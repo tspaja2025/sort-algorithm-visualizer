@@ -9,22 +9,23 @@ import {
   Card,
   CardAction,
   CardContent,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { useStore } from '@/lib/store';
 import { algorithms } from '@/lib/sort-algorithms/index';
 import type { Algorithm, SortElement } from '@/lib/types';
-import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSortingAnimation } from '@/lib/useSortingAnimation';
+import { DarkMode } from '@/components/darkMode';
 
 export default function SortingVisualizer() {
   const [size, setSize] = useState(300);
   const [delay, setDelay] = useState(2);
   const [bars, setBars] = useState<SortElement[]>([]);
   const [algorithm, setAlgorithm] = useState<Algorithm | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const {
@@ -52,12 +53,6 @@ export default function SortingVisualizer() {
     }
     setBars(arrayToSort.map((v) => ({ value: v, access: false })));
   }, [algorithm, arrayToSort, setRunning]);
-
-  // Memoize regenerateArray
-  const regenerateArray = useCallback(() => {
-    storeRegenerateArray(size);
-    reset();
-  }, [size, storeRegenerateArray, reset]);
 
   // Memoize step function
   const step = useCallback(async () => {
@@ -147,27 +142,22 @@ export default function SortingVisualizer() {
   }, [algorithm, size]);
 
   return (
-    <div className="grid h-screen grid-rows-[auto_1fr_auto] gap-2 p-4">
+    <div className="grid h-screen gap-2 p-4">
       <Card>
         <CardHeader>
           <CardTitle>Algorithm Visualizer</CardTitle>
-          <CardAction>
+          <CardAction className='flex items-center gap-2'>
+            <DarkMode/>
             <AlgorithmSelector
               selectAlgorithmAction={selectAlgorithm}
               selectedAlgorithm={algorithm}
             />
           </CardAction>
         </CardHeader>
-      </Card>
-
-      <Card>
         <CardContent id="bars-container" className="flex min-h-80 flex-grow">
           <BarsRender bars={bars} />
         </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="flex gap-2">
+        <CardFooter className='gap-2'>
           <div className="flex-1">
             <ControlButtons resetAction={reset} size={size} stepAction={step} />
           </div>
@@ -175,7 +165,7 @@ export default function SortingVisualizer() {
             {arraySizeComponent}
             <RangeDelay delay={delay} setDelayAction={setDelay} />
           </div>
-        </CardContent>
+        </CardFooter>
       </Card>
     </div>
   );

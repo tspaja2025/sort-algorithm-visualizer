@@ -1,6 +1,5 @@
 'use client';
 
-import { generateArray, shuffle } from '@/lib/randomized-array-generator';
 import { Button } from '@/components/ui/button';
 import { useStore } from '@/lib/store';
 
@@ -13,7 +12,7 @@ export function ControlButtons({
   stepAction: () => void;
   resetAction: () => void;
 }) {
-  const { arrayToSort, running, setRunning, setArrayToSort } = useStore();
+  const { arrayToSort, running, setRunning, setArrayToSort, regenerateArray  } = useStore();
 
   const start = () => {
     setRunning(!running);
@@ -26,8 +25,7 @@ export function ControlButtons({
   };
 
   const shuffleClick = () => {
-    const newArray = shuffle([...arrayToSort]);
-    setArrayToSort(newArray);
+    regenerateArray(size);
     resetAction();
   };
 

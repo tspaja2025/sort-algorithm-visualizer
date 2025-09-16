@@ -5,12 +5,12 @@ import { useEffect, useRef } from 'react';
 
 export function BarsRender({
   bars,
-  spaceWidth = 0.2,
-  backgroundColor = 'lightgray',
+  spaceWidth = 0.1,
+  backgroundColor = 'gray',
   colors = {
-    accessed: 'darkgreen',
-    sorted: 'lime',
-    default: 'gray',
+    accessed: 'red',
+    sorted: 'green',
+    default: 'lightgray',
   },
   transitionSpeed = 0.2,
 }: BarsRenderProps) {
