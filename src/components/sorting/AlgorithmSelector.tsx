@@ -1,46 +1,60 @@
 'use client';
 
 import { algorithms } from '@/lib/sort-algorithms/index';
-import { buttonVariants } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import React from 'react';
-import { Algorithm } from '@/lib/types';
+import { Input } from '@/components/ui/input';
+import React, { useMemo, useState } from 'react';
+import { AlgorithmSelectorProps } from '@/lib/types';
 
 export function AlgorithmSelector({
   selectAlgorithmAction,
   selectedAlgorithm,
-}: {
-  selectAlgorithmAction: (algo: Algorithm) => void;
-  selectedAlgorithm: Algorithm | null;
-}) {
-  const allAlgorithms = algorithms.flat();
+}: AlgorithmSelectorProps) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const allAlgorithms = useMemo(() => algorithms.flat(), []);
 
-  // Provide a default selected algorithm if none is selected
-  const selectedAlgorithmName = selectedAlgorithm?.name || '';
-
-  const handleValueChange = (algorithmName: string) => {
-    const algo = allAlgorithms.find((a) => a.name === algorithmName);
-    if (algo) {
-      selectAlgorithmAction(algo);
-    }
-  };
+  const filteredAlgorithms = useMemo(() => {
+    if (!searchTerm) return algorithms;
+    return algorithms
+      .map((group) =>
+        group.filter((algo) =>
+          algo.name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      )
+      .filter((group) => group.length > 0);
+  }, [searchTerm]);
 
   return (
-    <Select value={selectedAlgorithmName} onValueChange={handleValueChange}>
-      <SelectTrigger className={buttonVariants({ variant: 'outline' })}>
+    <Select
+      value={selectedAlgorithm?.name || ''}
+      onValueChange={(value) => {
+        const algo = allAlgorithms.find((a) => a.name === value);
+        if (algo) selectAlgorithmAction(algo);
+      }}
+    >
+      <SelectTrigger>
         <SelectValue placeholder="Select an Algorithm" />
       </SelectTrigger>
       <SelectContent>
-        {algorithms.map((algos, groupIndex) => (
+        <div className="p-2">
+          <Input
+            placeholder="Search algorithms..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        {filteredAlgorithms.map((group, groupIndex) => (
           <React.Fragment key={groupIndex}>
-            {algos.map((algo, index) => (
-              <SelectItem key={`${groupIndex}-${index}`} value={algo.name}>
+            {groupIndex > 0 && <SelectSeparator />}
+            {group.map((algo) => (
+              <SelectItem key={algo.name} value={algo.name}>
                 {algo.name}
               </SelectItem>
             ))}

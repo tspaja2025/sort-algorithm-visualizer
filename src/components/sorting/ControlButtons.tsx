@@ -12,7 +12,8 @@ export function ControlButtons({
   stepAction: () => void;
   resetAction: () => void;
 }) {
-  const { arrayToSort, running, setRunning, setArrayToSort, regenerateArray  } = useStore();
+  const { arrayToSort, running, setRunning, setArrayToSort, regenerateArray } =
+    useStore();
 
   const start = () => {
     setRunning(!running);

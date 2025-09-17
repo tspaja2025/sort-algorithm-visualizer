@@ -1,4 +1,5 @@
 import type { SortGenerator } from '@/lib/types';
+import { algorithms } from '.';
 
 // Insertion sort for small subarrays
 function* insertionSort(arr: number[], l: number, r: number): SortGenerator {
@@ -62,6 +63,7 @@ function* mergeSort(
 
   for (let t = l; t <= r; t++) {
     arr[t] = temp[t];
+    yield { access: [t], value: temp[t] };
   }
 }
 

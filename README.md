@@ -70,5 +70,3 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 *   Inspiration from other visualizers like [visualgo.net](https://visualgo.net/en/sorting) and  [sortvisualizer.com](https://www.sortvisualizer.com/)
 *   Algorithms and pseudocode from various educational resources (e.g., CLRS, Wikipedia)
-
-This is the current readme.md for my Sort Algorithm Visualizer project. Any improvements that could be made?

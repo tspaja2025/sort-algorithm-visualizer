@@ -9,6 +9,7 @@ import {
   Card,
   CardAction,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -16,10 +17,11 @@ import {
 import { useStore } from '@/lib/store';
 import { algorithms } from '@/lib/sort-algorithms/index';
 import type { Algorithm, SortElement } from '@/lib/types';
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSortingAnimation } from '@/lib/useSortingAnimation';
 import { DarkMode } from '@/components/darkMode';
+import { SortTimer } from '@/components/sorting/SortTimer';
 
 export default function SortingVisualizer() {
   const [size, setSize] = useState(300);
@@ -33,7 +35,48 @@ export default function SortingVisualizer() {
     running,
     setRunning,
     regenerateArray: storeRegenerateArray,
+    sortTime,
+    setSortTime,
+    resetSortTime,
   } = useStore();
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number | null>(null);
+
+  // Timer logic
+  useEffect(() => {
+    if (running) {
+      // Start timer
+      resetSortTime();
+      startTimeRef.current = Date.now();
+
+      timerRef.current = setInterval(() => {
+        if (startTimeRef.current) {
+          setSortTime(Date.now() - startTimeRef.current);
+        }
+      }, 10); // Update every 10ms for smooth display
+    } else {
+      // Stop timer
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      if (startTimeRef.current) {
+        setSortTime(Date.now() - startTimeRef.current);
+        startTimeRef.current = null;
+      }
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [running, setSortTime, resetSortTime]);
+
+  // Reset timer when algorithm changes or array is reset
+  useEffect(() => {
+    resetSortTime();
+  }, [algorithm, arrayToSort, resetSortTime]);
 
   // Memoize updateBars to prevent infinite re-renders
   const updateBars = useCallback((b: number[], p: { access: number[] }) => {
@@ -146,8 +189,11 @@ export default function SortingVisualizer() {
       <Card>
         <CardHeader>
           <CardTitle>Algorithm Visualizer</CardTitle>
-          <CardAction className='flex items-center gap-2'>
-            <DarkMode/>
+          <CardDescription>
+            <SortTimer time={sortTime} />
+          </CardDescription>
+          <CardAction className="flex items-center gap-2">
+            <DarkMode />
             <AlgorithmSelector
               selectAlgorithmAction={selectAlgorithm}
               selectedAlgorithm={algorithm}
@@ -157,7 +203,7 @@ export default function SortingVisualizer() {
         <CardContent id="bars-container" className="flex min-h-80 flex-grow">
           <BarsRender bars={bars} />
         </CardContent>
-        <CardFooter className='gap-2'>
+        <CardFooter className="gap-2">
           <div className="flex-1">
             <ControlButtons resetAction={reset} size={size} stepAction={step} />
           </div>

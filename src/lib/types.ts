@@ -12,6 +12,11 @@ export type BarsRenderProps = {
   transitionSpeed?: number;
 };
 
+export type AlgorithmSelectorProps = {
+  selectAlgorithmAction: (algo: Algorithm) => void;
+  selectedAlgorithm: Algorithm | null;
+};
+
 export type SortElement = {
   value: number;
   access: boolean;
