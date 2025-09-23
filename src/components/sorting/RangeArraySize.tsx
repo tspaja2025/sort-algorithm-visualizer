@@ -1,36 +1,36 @@
-'use client';
+"use client";
 
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { useStore } from '@/lib/store';
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { useStore } from "@/lib/store";
 
 export function RangeArraySize({
-  size,
-  setSizeAction,
+	size,
+	setSizeAction,
 }: {
-  size: number;
-  setSizeAction: (value: number) => void;
+	size: number;
+	setSizeAction: (value: number) => void;
 }) {
-  const { running } = useStore();
+	const { running } = useStore();
 
-  const handleSizeChange = (value: number[]) => {
-    setSizeAction(value[0]);
-  };
+	const handleSizeChange = (value: number[]) => {
+		setSizeAction(value[0]);
+	};
 
-  return (
-    <div className="grid gap-2">
-      <Label className="flex w-full justify-between">
-        <span>Array size</span>
-        <span>{size} bars</span>
-      </Label>
-      <Slider
-        id="size"
-        disabled={running}
-        max={1024}
-        min={2}
-        value={[size]}
-        onValueChange={handleSizeChange}
-      />
-    </div>
-  );
+	return (
+		<div className="grid gap-2">
+			<Label className="flex w-full justify-between">
+				<span>Array size</span>
+				<span>{size} bars</span>
+			</Label>
+			<Slider
+				id="size"
+				disabled={running}
+				max={1024}
+				min={2}
+				value={[size]}
+				onValueChange={handleSizeChange}
+			/>
+		</div>
+	);
 }
