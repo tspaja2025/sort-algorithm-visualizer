@@ -17,7 +17,7 @@ An interactive web application that visually demonstrates how various sorting al
 | **Bogo**    | Randomized        | O(n·n!)              | Unbounded  | -      |
 | **Bubble**  | Comparison-based  | O(n²)                | O(n²)      | 32.09s |
 | **Cocktail**| Comparison-based  | O(n²)                | O(n²)      | 22.14s |
-| **Cycle**   | Comparison-based  | O(n²)                | O(n²)      |
+| **Cycle**   | Comparison-based  | O(n²)                | O(n²)      | 1m 8.12s |
 | **Exchange**| Comparison-based  | O(n²)                | O(n²)      | 35.74s |
 | **Gnome**   | Comparison-based  | O(n²)                | O(n²)      | 30.77s |
 | **Heap**    | Comparison-based  | O(n log n)           | O(n log n) | 1.78s |
