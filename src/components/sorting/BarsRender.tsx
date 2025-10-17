@@ -1,98 +1,66 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { BarsRenderProps, SortElement } from "@/lib/types";
+import { CONFIG } from "@/lib/config";
+import type { BarsRenderProps } from "@/lib/types";
 
 export function BarsRender({
-	bars,
-	spaceWidth = 0.1,
-	backgroundColor = "gray",
-	colors = {
-		accessed: "red",
-		sorted: "green",
-		default: "lightgray",
-	},
-	transitionSpeed = 0.2,
+  bars,
+  spaceWidth = CONFIG.transitions.spaceWidth,
+  backgroundColor = "gray",
+  colors = CONFIG.colors,
+  transitionSpeed = CONFIG.transitions.speed,
 }: BarsRenderProps) {
-	const canvasRef = useRef<HTMLCanvasElement | null>(null);
-	const animationRef = useRef<number>(0);
-	const currentHeightsRef = useRef<number[]>([]);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const currentHeightsRef = useRef<number[]>([]);
 
-	// Bar Color
-	const getBarColor = (bar: SortElement, index: number) => {
-		if (bar.access) return colors.accessed;
-		if (index === bar.value - 1) return colors.sorted;
-		return colors.default;
-	};
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-	useEffect(() => {
-		const canvas = canvasRef.current;
-		if (!canvas) return;
-		const context = canvas.getContext("2d");
-		if (!context) return;
+    const resize = () => {
+      if (canvas.width !== canvas.clientWidth)
+        canvas.width = canvas.clientWidth;
+      if (canvas.height !== canvas.clientHeight)
+        canvas.height = canvas.clientHeight;
+    };
 
-		// Resize canvas to match display size
-		const resizeCanvas = () => {
-			const displayWidth = canvas.clientWidth;
-			const displayHeight = canvas.clientHeight;
-			if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
-				canvas.width = displayWidth;
-				canvas.height = displayHeight;
-			}
-		};
+    if (currentHeightsRef.current.length !== bars.length)
+      currentHeightsRef.current = bars.map(() => 0);
 
-		// Initialize heights if first run or bars length changed
-		if (currentHeightsRef.current.length !== bars.length) {
-			currentHeightsRef.current = bars.map(() => 0);
-		}
+    let raf: number;
+    const draw = () => {
+      resize();
+      const { width, height } = canvas;
+      ctx.fillStyle = backgroundColor;
+      ctx.fillRect(0, 0, width, height);
+      const barWidth = (width - (bars.length - 1) * spaceWidth) / bars.length;
+      const step = height / bars.length;
 
-		const draw = () => {
-			resizeCanvas();
-			const { width, height } = canvas;
+      bars.forEach((bar, i) => {
+        const targetHeight = step * bar.value;
+        const current = currentHeightsRef.current[i] ?? 0;
+        const newHeight = current + (targetHeight - current) * transitionSpeed;
+        currentHeightsRef.current[i] = newHeight;
 
-			// background
-			context.fillStyle = backgroundColor;
-			context.fillRect(0, 0, width, height);
+        ctx.fillStyle = bar.access
+          ? colors.accessed
+          : i === bar.value - 1
+            ? colors.sorted
+            : colors.default;
 
-			if (bars.length === 0) return;
+        const x = i * (barWidth + spaceWidth);
+        const y = height - newHeight;
+        ctx.fillRect(x, y, barWidth, newHeight);
+      });
 
-			// bar calculations
-			const barWidth = (width - (bars.length - 1) * spaceWidth) / bars.length;
-			const oneStepSize = height / bars.length;
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => cancelAnimationFrame(raf);
+  }, [bars, spaceWidth, backgroundColor, colors, transitionSpeed]);
 
-			// update + draw bars
-			for (let i = 0; i < bars.length; i++) {
-				const bar = bars[i];
-				const targetHeight = oneStepSize * bar.value;
-
-				// Smooth transition using lerp
-				const current = currentHeightsRef.current[i] ?? 0;
-				const newHeight = current + (targetHeight - current) * transitionSpeed;
-				currentHeightsRef.current[i] = newHeight;
-
-				context.fillStyle = getBarColor(bar, i);
-
-				// Pixel snap for sharp edges
-				const x = Math.floor(i * (barWidth + spaceWidth));
-				const y = Math.floor(height - newHeight);
-				const w = Math.floor(barWidth);
-				const h = Math.floor(newHeight);
-
-				context.fillRect(x, y, w, h);
-			}
-		};
-
-		// animation loop
-		const loop = () => {
-			draw();
-			animationRef.current = requestAnimationFrame(loop);
-		};
-		loop();
-
-		return () => {
-			if (animationRef.current) cancelAnimationFrame(animationRef.current);
-		};
-	}, [bars, spaceWidth, backgroundColor, colors, transitionSpeed]);
-
-	return <canvas ref={canvasRef} style={{ width: "100%", height: "100%" }} />;
+  return <canvas ref={canvasRef} className="w-full h-full" />;
 }

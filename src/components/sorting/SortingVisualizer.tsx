@@ -1,218 +1,170 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { DarkMode } from "@/components/darkMode";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { DarkModeToggle } from "@/components/DarkModeToggle";
 import { AlgorithmSelector } from "@/components/sorting/AlgorithmSelector";
 import { BarsRender } from "@/components/sorting/BarsRender";
 import { ControlButtons } from "@/components/sorting/ControlButtons";
-import { RangeArraySize } from "@/components/sorting/RangeArraySize";
-import { RangeDelay } from "@/components/sorting/RangeDelay";
+import { RangeControl } from "@/components/sorting/RangeControl";
 import { SortTimer } from "@/components/sorting/SortTimer";
 import {
-	Card,
-	CardAction,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
-import { algorithms } from "@/lib/sort-algorithms/index";
+import { useSortTimer } from "@/hooks/use-sort-timer";
+import { useSortingAnimation } from "@/hooks/use-sorting-animation";
+import { CONFIG } from "@/lib/config";
+import { generateArray, slugify } from "@/lib/helpers";
+import { algorithms } from "@/lib/sort-algorithms";
+import { computeRealDelay } from "@/lib/sort-utils";
 import { useStore } from "@/lib/store";
 import type { Algorithm, SortElement } from "@/lib/types";
-import { useSortingAnimation } from "@/lib/useSortingAnimation";
 
-export default function SortingVisualizer() {
-	const [size, setSize] = useState(300);
-	const [delay, setDelay] = useState(2);
-	const [bars, setBars] = useState<SortElement[]>([]);
-	const [algorithm, setAlgorithm] = useState<Algorithm | null>(null);
-	const router = useRouter();
-	const searchParams = useSearchParams();
-	const {
-		arrayToSort,
-		running,
-		setRunning,
-		regenerateArray: storeRegenerateArray,
-		sortTime,
-		setSortTime,
-		resetSortTime,
-	} = useStore();
-	const timerRef = useRef<NodeJS.Timeout | null>(null);
-	const startTimeRef = useRef<number | null>(null);
+export function SortingVisualizer() {
+  const [size, setSize] = useState(300);
+  const [delay, setDelay] = useState(2);
+  const [bars, setBars] = useState<SortElement[]>([]);
+  const [algorithm, setAlgorithm] = useState<Algorithm | null>(null);
 
-	// Timer logic
-	useEffect(() => {
-		if (running) {
-			// Start timer
-			resetSortTime();
-			startTimeRef.current = Date.now();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const {
+    arrayToSort,
+    running,
+    sortTime,
+    setRunning,
+    regenerateArray,
+    setSortTime,
+    resetSortTime,
+  } = useStore();
 
-			timerRef.current = setInterval(() => {
-				if (startTimeRef.current) {
-					setSortTime(Date.now() - startTimeRef.current);
-				}
-			}, 10); // Update every 10ms for smooth display
-		} else {
-			// Stop timer
-			if (timerRef.current) {
-				clearInterval(timerRef.current);
-				timerRef.current = null;
-			}
-			if (startTimeRef.current) {
-				setSortTime(Date.now() - startTimeRef.current);
-				startTimeRef.current = null;
-			}
-		}
+  const algorithmMap = useMemo(
+    () => new Map(algorithms.flat().map((a) => [slugify(a.name), a])),
+    [],
+  );
 
-		return () => {
-			if (timerRef.current) {
-				clearInterval(timerRef.current);
-			}
-		};
-	}, [running, setSortTime, resetSortTime]);
+  const updateBars = useCallback(
+    (b: number[], p: { access: number[] }) =>
+      setBars(b.map((v, i) => ({ value: v, access: p.access.includes(i) }))),
+    [],
+  );
 
-	// Reset timer when algorithm changes or array is reset
-	useEffect(() => {
-		resetSortTime();
-	}, [algorithm, arrayToSort, resetSortTime]);
+  const reset = useCallback(() => {
+    setRunning(false);
+    if (algorithm)
+      setAlgorithm({ ...algorithm, instance: algorithm.function(arrayToSort) });
+    setBars(arrayToSort.map((v) => ({ value: v, access: false })));
+  }, [algorithm, arrayToSort, setRunning]);
 
-	// Memoize updateBars to prevent infinite re-renders
-	const updateBars = useCallback((b: number[], p: { access: number[] }) => {
-		setBars(
-			[...b].map((v, i) => ({
-				value: v,
-				access: p.access.includes(i),
-			})),
-		);
-	}, []); // Empty dependency array since it doesn't depend on any state
+  const step = useCallback(async () => {
+    if (!algorithm?.instance) return;
+    setRunning(false);
+    await new Promise((r) => setTimeout(r, 50));
+    const next = algorithm.instance.next();
+    if (!next.done && next.value) updateBars(arrayToSort, next.value);
+  }, [algorithm, arrayToSort, updateBars, setRunning]);
 
-	// Memoize reset function
-	const reset = useCallback(() => {
-		setRunning(false);
-		if (algorithm) {
-			setAlgorithm({ ...algorithm, instance: algorithm.function(arrayToSort) });
-		}
-		setBars(arrayToSort.map((v) => ({ value: v, access: false })));
-	}, [algorithm, arrayToSort, setRunning]);
+  useSortTimer(running, setSortTime, resetSortTime);
 
-	// Memoize step function
-	const step = useCallback(async () => {
-		if (running) {
-			setRunning(false);
-			await new Promise((resolve) => setTimeout(resolve, 0));
-		}
+  const selectAlgorithm = useCallback(
+    (algo: Algorithm, updateUrl = true) => {
+      setRunning(false);
+      requestAnimationFrame(() => {
+        setAlgorithm({ ...algo, instance: algo.function(arrayToSort) });
+        setBars(arrayToSort.map((v) => ({ value: v, access: false })));
+        if (updateUrl) {
+          const params = new URLSearchParams(searchParams);
+          params.set("algorithm", slugify(algo.name));
+          router.replace(`?${params}`, { scroll: false });
+        }
+      });
+    },
+    [arrayToSort, router, searchParams, setRunning],
+  );
 
-		if (!algorithm?.instance) return;
+  useEffect(() => {
+    const selected = searchParams.get("algorithm");
+    const algo = selected ? algorithmMap.get(selected) : algorithms[0][0];
+    if (algo) selectAlgorithm(algo, false);
+  }, [searchParams, algorithmMap, selectAlgorithm]);
 
-		const next = algorithm.instance.next();
-		if (!next.done && next.value) {
-			updateBars(arrayToSort, next.value);
-		}
-	}, [running, algorithm, arrayToSort, updateBars, setRunning]);
+  useEffect(() => {
+    if (size !== arrayToSort.length) {
+      regenerateArray(size);
+      if (algorithm)
+        setAlgorithm({
+          ...algorithm,
+          instance: algorithm.function(generateArray(size)),
+        });
+    }
+  }, [size, arrayToSort.length, regenerateArray, algorithm]);
 
-	// Memoize selectAlgorithm
-	const selectAlgorithm = useCallback(
-		(algo: Algorithm, updateUrl = true) => {
-			setRunning(false);
-			setAlgorithm({ ...algo, instance: algo.function(arrayToSort) });
-			setBars(arrayToSort.map((v) => ({ value: v, access: false })));
+  useSortingAnimation(
+    running,
+    algorithm,
+    delay,
+    arrayToSort,
+    updateBars,
+    setRunning,
+  );
 
-			if (updateUrl) {
-				const params = new URLSearchParams(searchParams.toString());
-				params.set("algorithm", algo.name.toLowerCase().replace(/ /g, "-"));
-				router.replace(`?${params.toString()}`, { scroll: false });
-			}
-		},
-		[arrayToSort, setRunning, searchParams, router],
-	);
+  const arraySizeComponent = algorithm?.arraySizeComponent ? (
+    <algorithm.arraySizeComponent size={size} setSizeAction={setSize} />
+  ) : (
+    <RangeControl
+      label="Array size"
+      value={size}
+      onChange={setSize}
+      min={CONFIG.limits.minSize}
+      max={CONFIG.limits.maxSize}
+      disabled={running}
+      displayValue={`${size} bars`}
+    />
+  );
 
-	// Initial setup effect - runs only once
-	useEffect(() => {
-		const barsContainer = document.getElementById("bars-container");
-		if (barsContainer) {
-			barsContainer.style.height = `${barsContainer.offsetHeight}px`;
-		}
-
-		const selectedAlgorithm = searchParams.get("algorithm");
-
-		if (!selectedAlgorithm) {
-			selectAlgorithm(algorithms[0][0], false);
-		} else {
-			const algo = algorithms
-				.flat()
-				.find(
-					(a) => a.name.toLowerCase().replace(/ /g, "-") === selectedAlgorithm,
-				);
-
-			if (algo) {
-				selectAlgorithm(algo, false);
-			}
-		}
-	}, [searchParams, selectAlgorithm]);
-
-	// Effect for size changes
-	useEffect(() => {
-		if (size !== arrayToSort.length) {
-			storeRegenerateArray(size);
-			if (algorithm) {
-				setAlgorithm({
-					...algorithm,
-					instance: algorithm.function(arrayToSort),
-				});
-			}
-		}
-	}, [size, arrayToSort.length, storeRegenerateArray, algorithm, arrayToSort]);
-
-	// Main animation effect - fixed dependencies
-	useSortingAnimation(
-		running,
-		algorithm,
-		delay,
-		arrayToSort,
-		updateBars,
-		setRunning,
-	);
-
-	// Memoize the array size component to prevent unnecessary re-renders
-	const arraySizeComponent = useMemo(() => {
-		return algorithm?.arraySizeComponent ? (
-			<algorithm.arraySizeComponent size={size} setSizeAction={setSize} />
-		) : (
-			<RangeArraySize size={size} setSizeAction={setSize} />
-		);
-	}, [algorithm, size]);
-
-	return (
-		<div className="font-sans grid h-screen gap-2 p-4">
-			<Card>
-				<CardHeader>
-					<CardTitle>Algorithm Visualizer</CardTitle>
-					<CardDescription>
-						<SortTimer time={sortTime} />
-					</CardDescription>
-					<CardAction className="flex items-center gap-2">
-						<DarkMode />
-						<AlgorithmSelector
-							selectAlgorithmAction={selectAlgorithm}
-							selectedAlgorithm={algorithm}
-						/>
-					</CardAction>
-				</CardHeader>
-				<CardContent id="bars-container" className="flex min-h-80 flex-grow">
-					<BarsRender bars={bars} />
-				</CardContent>
-				<CardFooter className="gap-2">
-					<div className="flex-1">
-						<ControlButtons resetAction={reset} size={size} stepAction={step} />
-					</div>
-					<div className="flex flex-1 flex-col gap-2">
-						{arraySizeComponent}
-						<RangeDelay delay={delay} setDelayAction={setDelay} />
-					</div>
-				</CardFooter>
-			</Card>
-		</div>
-	);
+  return (
+    <div className="font-sans grid h-screen gap-2 p-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Algorithm Visualizer</CardTitle>
+          <CardDescription>
+            <SortTimer time={sortTime} />
+          </CardDescription>
+          <CardAction className="flex items-center gap-2">
+            <DarkModeToggle />
+            <AlgorithmSelector
+              selectAlgorithmAction={selectAlgorithm}
+              selectedAlgorithm={algorithm}
+            />
+          </CardAction>
+        </CardHeader>
+        <CardContent id="bars-container" className="flex min-h-80 flex-grow">
+          <BarsRender bars={bars} />
+        </CardContent>
+        <CardFooter className="gap-2">
+          <div className="flex-1">
+            <ControlButtons resetAction={reset} size={size} stepAction={step} />
+          </div>
+          <div className="flex flex-1 flex-col gap-2">
+            {arraySizeComponent}
+            <RangeControl
+              label="Delay"
+              value={delay}
+              onChange={setDelay}
+              min={CONFIG.limits.minDelay}
+              max={CONFIG.limits.maxDelay}
+              step={1}
+              displayValue={`${computeRealDelay(delay)} ms`}
+            />
+          </div>
+        </CardFooter>
+      </Card>
+    </div>
+  );
 }

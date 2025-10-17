@@ -21,85 +21,85 @@ import { tim } from "@/lib/sort-algorithms/tim";
 import type { Algorithm } from "@/lib/types";
 
 export const algorithms: Algorithm[][] = [
-	[
-		{
-			name: "Bubble Sort",
-			function: bubble,
-		},
-		{
-			name: "Quick Sort",
-			function: quick,
-		},
-		{
-			name: "Shell Sort",
-			function: shell,
-		},
-		{
-			name: "Merge Sort",
-			function: merge,
-		},
-		{
-			name: "Insertion Sort",
-			function: insertion,
-		},
-		{
-			name: "Selection Sort",
-			function: selection,
-		},
-		{
-			name: "Radix LSD Sort",
-			function: radixLSD,
-		},
-		{
-			name: "Radix MSD Sort",
-			function: radixMSD,
-		},
-		{
-			name: "Heap Sort",
-			function: heap,
-		},
-		{
-			name: "Bitonic Sort",
-			function: bitonic,
-			arraySizeComponent: RangeArraySizePowerOfTwo,
-		},
-		{
-			name: "Tim Sort",
-			function: tim,
-		},
-		{
-			name: "Gnome Sort",
-			function: gnome,
-		},
-		{
-			name: "Cycle Sort",
-			function: cycle,
-		},
-		{
-			name: "Cocktail Sort",
-			function: cocktail,
-		},
-		{
-			name: "Pancake Sort",
-			function: pancake,
-		},
-	],
-	[
-		{
-			name: "Stooge Sort",
-			function: stooge,
-		},
-		{
-			name: "Bogo Sort",
-			function: bogo,
-		},
-		{
-			name: "Exchange Sort",
-			function: exchange,
-		},
-		{
-			name: "Odd Even Sort",
-			function: oddEven,
-		},
-	],
+  [
+    {
+      name: "Bubble Sort",
+      function: bubble,
+    },
+    {
+      name: "Quick Sort",
+      function: quick,
+    },
+    {
+      name: "Shell Sort",
+      function: shell,
+    },
+    {
+      name: "Merge Sort",
+      function: merge,
+    },
+    {
+      name: "Insertion Sort",
+      function: insertion,
+    },
+    {
+      name: "Selection Sort",
+      function: selection,
+    },
+    {
+      name: "Radix LSD Sort",
+      function: radixLSD,
+    },
+    {
+      name: "Radix MSD Sort",
+      function: radixMSD,
+    },
+    {
+      name: "Heap Sort",
+      function: heap,
+    },
+    {
+      name: "Bitonic Sort",
+      function: bitonic,
+      arraySizeComponent: RangeArraySizePowerOfTwo,
+    },
+    {
+      name: "Tim Sort",
+      function: tim,
+    },
+    {
+      name: "Gnome Sort",
+      function: gnome,
+    },
+    {
+      name: "Cycle Sort",
+      function: cycle,
+    },
+    {
+      name: "Cocktail Sort",
+      function: cocktail,
+    },
+    {
+      name: "Pancake Sort",
+      function: pancake,
+    },
+  ],
+  [
+    {
+      name: "Stooge Sort",
+      function: stooge,
+    },
+    {
+      name: "Bogo Sort",
+      function: bogo,
+    },
+    {
+      name: "Exchange Sort",
+      function: exchange,
+    },
+    {
+      name: "Odd Even Sort",
+      function: oddEven,
+    },
+  ],
 ];
