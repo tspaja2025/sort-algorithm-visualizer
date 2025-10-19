@@ -1,5 +1,4 @@
 import type { SortGenerator } from "@/lib/types";
-import { algorithms } from ".";
 
 // Insertion sort for small subarrays
 function* insertionSort(arr: number[], l: number, r: number): SortGenerator {

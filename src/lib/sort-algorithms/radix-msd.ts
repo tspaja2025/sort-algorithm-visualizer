@@ -1,6 +1,9 @@
-import type { SortGenerator } from "@/lib/types";
+import type { ProgressIndicator, SortGenerator } from "@/lib/types";
 
-function* getMax(arr: number[], n: number) {
+function* getMax(
+  arr: number[],
+  n: number,
+): Generator<ProgressIndicator, number> {
   let mx = arr[0];
   for (let i = 1; i < n; i++) {
     yield { access: [i] };
@@ -9,7 +12,7 @@ function* getMax(arr: number[], n: number) {
   return mx;
 }
 
-function* countSortMSD(
+function* countSort(
   arr: number[],
   exp: number,
   start: number,
@@ -76,7 +79,7 @@ function* radixSortMSDUtil(
     return;
   }
 
-  yield* countSortMSD(arr, exp, start, end);
+  yield* countSort(arr, exp, start, end);
 
   const bucketStarts = new Array(11).fill(0); // 0-9 + end marker
   for (let i = start; i <= end; i++) {
@@ -109,12 +112,16 @@ function* radixSortMSDUtil(
 export function* radixMSD(arr: number[]): SortGenerator {
   const len = arr.length;
 
+  // Guard: Only non-negative integers supported
+  if (arr.some((v) => v < 0 || !Number.isInteger(v))) {
+    return;
+  }
+
   const m = yield* getMax(arr, len);
 
+  // Find most significant digit's place value
   let exp = 1;
-  while (Math.floor(m / exp) > 0) {
-    exp *= 10;
-  }
+  while (Math.floor(m / exp) > 0) exp *= 10;
   exp /= 10;
 
   yield* radixSortMSDUtil(arr, exp, 0, len - 1);

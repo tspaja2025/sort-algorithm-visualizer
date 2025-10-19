@@ -1,7 +1,6 @@
-import type { SortGenerator } from "@/lib/types";
+import type { ProgressIndicator, SortGenerator } from "@/lib/types";
 
 const MIN_MERGE = 32;
-const MIN_GALLOP = 7;
 
 function minRunLength(n: number): number {
   let r = 0;
@@ -18,54 +17,62 @@ function* binaryInsertionSort(
   end: number,
 ): SortGenerator {
   for (let i = start + 1; i <= end; i++) {
-    const temp = arr[i];
+    const key = arr[i];
+    let j = i - 1;
+
+    // Find insertion point using binary search
     let left = start;
     let right = i - 1;
-
     while (left <= right) {
-      const mid = Math.floor((left + right) / 2);
-      yield { access: [i, mid] };
-      if (arr[mid] <= temp) {
+      const mid = (left + right) >> 1;
+      yield { access: [i, mid], comparison: [i, mid] };
+      if (arr[mid] <= key) {
         left = mid + 1;
       } else {
         right = mid - 1;
       }
     }
 
-    for (let j = i; j > left; j--) {
+    // Shift elements and insert
+    const insertPos = left;
+    for (j = i; j > insertPos; j--) {
       arr[j] = arr[j - 1];
-      yield { access: [j, j - 1] };
+      yield { access: [j, j - 1], swap: true };
     }
-    arr[left] = temp;
-    yield { access: [left] };
+    arr[insertPos] = key;
+    yield { access: [insertPos] };
   }
 }
 
-function* countRunAndMakeAscending(arr: number[], start: number, n: number) {
-  if (start >= n - 1) return start;
+function* countRunAndMakeAscending(
+  arr: number[],
+  start: number,
+  end: number,
+): Generator<ProgressIndicator, number> {
+  if (start >= end) return start;
 
-  let runEnd = start + 1;
-  yield { access: [start, runEnd] };
+  let runEnd = start;
 
-  if (arr[start] > arr[runEnd]) {
+  // Handle descending runs
+  if (arr[start] > arr[start + 1]) {
     // Descending run
-    while (runEnd < n - 1 && arr[runEnd] > arr[runEnd + 1]) {
-      yield { access: [runEnd, runEnd + 1] };
+    while (runEnd < end && arr[runEnd] > arr[runEnd + 1]) {
+      yield { access: [runEnd + 1], comparison: [runEnd, runEnd + 1] };
       runEnd++;
     }
-    // Reverse the run
+    // Reverse the run in place
     let left = start;
     let right = runEnd;
     while (left < right) {
-      yield { access: [left, right] };
       [arr[left], arr[right]] = [arr[right], arr[left]];
+      yield { access: [left, right], swap: true };
       left++;
       right--;
     }
   } else {
     // Ascending run
-    while (runEnd < n - 1 && arr[runEnd] <= arr[runEnd + 1]) {
-      yield { access: [runEnd, runEnd + 1] };
+    while (runEnd < end && arr[runEnd] <= arr[runEnd + 1]) {
+      yield { access: [runEnd, runEnd + 1], comparison: [runEnd, runEnd + 1] };
       runEnd++;
     }
   }
@@ -79,81 +86,74 @@ function* merge(
   mid: number,
   end: number,
 ): SortGenerator {
-  const len1 = mid - start + 1;
-  const len2 = end - mid;
-  const left = new Array(len1);
-  const right = new Array(len2);
+  const left = arr.slice(start, mid + 1);
+  const right = arr.slice(mid + 1, end + 1);
 
-  for (let i = 0; i < len1; i++) {
-    left[i] = arr[start + i];
-    yield { access: [start + i] };
-  }
-  for (let j = 0; j < len2; j++) {
-    right[j] = arr[mid + 1 + j];
-    yield { access: [mid + 1 + j] };
+  // Yield initial array copies for visualizatino
+  for (let i = start; i <= end; i++) {
+    yield { access: [i] };
   }
 
   let i = 0,
     j = 0,
     k = start;
 
-  while (i < len1 && j < len2) {
-    yield { access: [k] };
+  while (i < left.length && j < right.length) {
+    yield { access: [k], comparison: [start + i, mid + 1 + j] };
+
     if (left[i] <= right[j]) {
-      arr[k++] = left[i++];
+      arr[k] = left[i++];
     } else {
-      arr[k++] = right[j++];
+      arr[k] = right[j++];
     }
+    k++;
   }
 
-  while (i < len1) {
-    yield { access: [k] };
+  // Copy remaining elements
+  while (i < left.length) {
     arr[k++] = left[i++];
+    yield { access: [k - 1] };
   }
 
-  while (j < len2) {
-    yield { access: [k] };
+  while (j < right.length) {
     arr[k++] = right[j++];
+    yield { access: [k - 1] };
   }
 }
 
-function* doMerge(
+function* mergeRuns(
   arr: number[],
   runStack: Array<[number, number]>,
   i: number,
-  j: number,
 ): SortGenerator {
   const [base1, len1] = runStack[i];
-  const [base2, len2] = runStack[j];
+  const [base2, len2] = runStack[i + 1];
+  const end = base1 + len1 + len2 - 1;
 
-  yield* merge(arr, base1, base1 + len1 - 1, base1 + len1 + len2 - 1);
+  yield* merge(arr, base1, base1 + len1 - 1, end);
   runStack[i] = [base1, len1 + len2];
-  runStack.splice(j, 1);
+  runStack.splice(i + 1, 1);
 }
 
-function* manageRunStack(
+function* mergeCollapse(
   arr: number[],
   runStack: Array<[number, number]>,
 ): SortGenerator {
   while (runStack.length > 1) {
     const n = runStack.length;
-    const [baseY, lenY] = runStack[n - 2];
-    const [baseZ, lenZ] = runStack[n - 1];
 
-    if (n > 2) {
-      const [baseX, lenX] = runStack[n - 3];
-      if (lenX <= lenY + lenZ) {
-        if (lenX < lenZ) {
-          yield* doMerge(arr, runStack, n - 3, n - 2);
-        } else {
-          yield* doMerge(arr, runStack, n - 2, n - 1);
-        }
-        continue;
+    // Check sorting merge conditions
+    if (
+      n >= 3 &&
+      runStack[n - 3][1] <= runStack[n - 2][1] + runStack[n - 1][1]
+    ) {
+      if (runStack[n - 3][1] < runStack[n - 1][1]) {
+        yield* mergeRuns(arr, runStack, n - 3);
+      } else {
+        yield* mergeRuns(arr, runStack, n - 2);
       }
-    }
-
-    if (lenY <= lenZ) {
-      yield* doMerge(arr, runStack, n - 2, n - 1);
+    } else if (runStack[n - 2][1] <= runStack[n - 1][1]) {
+      yield* mergeRuns(arr, runStack, n - 2);
     } else {
       break;
     }
@@ -169,21 +169,24 @@ export function* tim(arr: number[]): SortGenerator {
   let current = 0;
 
   while (current < n) {
-    const runEnd = yield* countRunAndMakeAscending(arr, current, n);
-    let runLen = runEnd - current + 1;
+    const runEnd = yield* countRunAndMakeAscending(arr, current, n - 1);
+    let runLength = runEnd - current + 1;
 
-    if (runLen < minRun) {
-      const forceLen = Math.min(minRun, n - current);
-      yield* binaryInsertionSort(arr, current, current + forceLen - 1);
-      runLen = forceLen;
+    // Extend short runs with binary insertion sort
+    if (runLength < minRun) {
+      const targetLength = Math.min(minRun, n - current);
+      yield* binaryInsertionSort(arr, current, current + targetLength - 1);
+      runLength = targetLength;
     }
 
-    runStack.push([current, runLen]);
-    yield* manageRunStack(arr, runStack);
-    current += runLen;
+    runStack.push([current, runLength]);
+    yield* mergeCollapse(arr, runStack);
+
+    current += runLength;
   }
 
+  // Merge all remaining runs
   while (runStack.length > 1) {
-    yield* doMerge(arr, runStack, runStack.length - 2, runStack.length - 1);
+    yield* mergeRuns(arr, runStack, runStack.length - 2);
   }
 }
