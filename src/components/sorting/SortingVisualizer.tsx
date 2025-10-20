@@ -129,9 +129,9 @@ export function SortingVisualizer() {
   );
 
   return (
-    <div className="font-sans grid h-screen gap-2 p-4">
-      <Card>
-        <CardHeader>
+    <div className="font-sans grid h-screen">
+      <Card className="border-0 shadow-none rounded-none gap-2">
+        <CardHeader className="px-4">
           <CardTitle>Algorithm Visualizer</CardTitle>
           <CardDescription>
             <SortTimer time={sortTime} />
@@ -144,10 +144,13 @@ export function SortingVisualizer() {
             />
           </CardAction>
         </CardHeader>
-        <CardContent id="bars-container" className="flex min-h-80 flex-grow">
+        <CardContent
+          id="bars-container"
+          className="flex min-h-80 flex-grow px-4"
+        >
           <BarsRender bars={bars} />
         </CardContent>
-        <CardFooter className="gap-2">
+        <CardFooter className="gap-2 px-4">
           <div className="flex-1">
             <ControlButtons resetAction={reset} size={size} stepAction={step} />
           </div>
