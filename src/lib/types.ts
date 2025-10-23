@@ -71,3 +71,27 @@ export type variantType =
   | "ghost"
   | null
   | undefined;
+
+export type RangeControlProps = {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  min: number;
+  max: number;
+  step?: number;
+  disabled?: boolean;
+  displayValue?: string;
+};
+
+export type SortTimerProps = { time: number };
+
+export type RangeArraySizePowerOfTwoProps = {
+  size: number;
+  setSizeAction: (value: number) => void;
+};
+
+export type ControlButtonsProps = {
+  size: number;
+  stepAction: () => void;
+  resetAction: () => void;
+};

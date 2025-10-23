@@ -1,6 +1,9 @@
+"use client";
+
+import { SortTimerProps } from "@/lib/types";
 import { ClockIcon } from "lucide-react";
 
-export function SortTimer({ time }: { time: number }) {
+export function SortTimer({ time }: SortTimerProps) {
   const format = (ms: number) =>
     ms < 1000
       ? `${ms}ms`

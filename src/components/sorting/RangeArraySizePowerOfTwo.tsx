@@ -3,14 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useStore } from "@/lib/store";
+import { RangeArraySizePowerOfTwoProps } from "@/lib/types";
 
 export function RangeArraySizePowerOfTwo({
   size,
   setSizeAction,
-}: {
-  size: number;
-  setSizeAction: (value: number) => void;
-}) {
+}: RangeArraySizePowerOfTwoProps) {
   const steps = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024];
   const { running } = useStore();
 

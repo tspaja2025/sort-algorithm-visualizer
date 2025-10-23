@@ -1,18 +1,14 @@
 import { create } from "zustand";
-import { generateArray, shuffle } from "@/lib/helpers";
+import { generateArray, shuffle } from "@/lib/sort-utils";
 import type { StoreState } from "@/lib/types";
 
-export const useStore = create<StoreState>((set) => {
-  const update = (partial: Partial<StoreState>) => set(partial);
-  return {
-    arrayToSort: shuffle(generateArray(300)),
-    running: false,
-    sortTime: 0,
-    setSortTime: (sortTime) => update({ sortTime }),
-    resetSortTime: () => update({ sortTime: 0 }),
-    setArrayToSort: (arrayToSort) => update({ arrayToSort }),
-    setRunning: (running) => update({ running }),
-    regenerateArray: (size) =>
-      update({ arrayToSort: shuffle(generateArray(size)) }),
-  };
-});
+export const useStore = create<StoreState>((set) => ({
+  arrayToSort: shuffle(generateArray(300)),
+  running: false,
+  sortTime: 0,
+  setSortTime: (sortTime) => set({ sortTime }),
+  resetSortTime: () => set({ sortTime: 0 }),
+  setArrayToSort: (arrayToSort) => set({ arrayToSort }),
+  setRunning: (running) => set({ running }),
+  regenerateArray: (size) => set({ arrayToSort: shuffle(generateArray(size)) }),
+}));

@@ -2,17 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store";
-import type { variantType } from "@/lib/types";
+import { ControlButtonsProps, variantType } from "@/lib/types";
 
 export function ControlButtons({
   size,
   stepAction,
   resetAction,
-}: {
-  size: number;
-  stepAction: () => void;
-  resetAction: () => void;
-}) {
+}: ControlButtonsProps) {
   const { arrayToSort, running, setRunning, setArrayToSort, regenerateArray } =
     useStore();
 

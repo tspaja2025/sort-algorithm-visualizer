@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -11,7 +10,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { algorithms } from "@/lib/sort-algorithms";
-import type { AlgorithmSelectorProps } from "@/lib/types";
+import { AlgorithmSelectorProps } from "@/lib/types";
+import React, { useMemo, useState } from "react";
 
 export function AlgorithmSelector({
   selectAlgorithmAction,

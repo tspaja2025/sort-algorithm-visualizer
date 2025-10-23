@@ -1,13 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
-import { AlgorithmSelector } from "@/components/sorting/AlgorithmSelector";
-import { BarsRender } from "@/components/sorting/BarsRender";
-import { ControlButtons } from "@/components/sorting/ControlButtons";
-import { RangeControl } from "@/components/sorting/RangeControl";
-import { SortTimer } from "@/components/sorting/SortTimer";
 import {
   Card,
   CardAction,
@@ -19,12 +12,22 @@ import {
 } from "@/components/ui/card";
 import { useSortTimer } from "@/hooks/use-sort-timer";
 import { useSortingAnimation } from "@/hooks/use-sorting-animation";
-import { CONFIG } from "@/lib/config";
-import { generateArray, slugify } from "@/lib/helpers";
 import { algorithms } from "@/lib/sort-algorithms";
-import { computeRealDelay } from "@/lib/sort-utils";
+import {
+  computeRealDelay,
+  CONFIG,
+  generateArray,
+  slugify,
+} from "@/lib/sort-utils";
 import { useStore } from "@/lib/store";
-import type { Algorithm, SortElement } from "@/lib/types";
+import { Algorithm, SortElement } from "@/lib/types";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { RangeControl } from "@/components/sorting/RangeControl";
+import { AlgorithmSelector } from "@/components/sorting/AlgorithmSelector";
+import { BarsRender } from "@/components/sorting/BarsRender";
+import { ControlButtons } from "@/components/sorting/ControlButtons";
+import { SortTimer } from "@/components/sorting/SortTimer";
 
 export function SortingVisualizer() {
   const [size, setSize] = useState(300);
@@ -129,9 +132,9 @@ export function SortingVisualizer() {
   );
 
   return (
-    <div className="font-sans grid h-screen">
-      <Card className="border-0 shadow-none rounded-none gap-2">
-        <CardHeader className="px-4">
+    <div className="font-sans grid h-screen gap-2">
+      <Card className="rounded-none border-0 shadow-none">
+        <CardHeader>
           <CardTitle>Algorithm Visualizer</CardTitle>
           <CardDescription>
             <SortTimer time={sortTime} />
@@ -144,13 +147,12 @@ export function SortingVisualizer() {
             />
           </CardAction>
         </CardHeader>
-        <CardContent
-          id="bars-container"
-          className="flex min-h-80 flex-grow px-4"
-        >
+
+        <CardContent id="bars-container" className="flex min-h-80 flex-grow">
           <BarsRender bars={bars} />
         </CardContent>
-        <CardFooter className="gap-2 px-4">
+
+        <CardFooter className="gap-2">
           <div className="flex-1">
             <ControlButtons resetAction={reset} size={size} stepAction={step} />
           </div>

@@ -12,22 +12,15 @@ export function useSortTimer(
     if (running) {
       resetSortTime();
       startRef.current = Date.now();
-
       timerRef.current = setInterval(() => {
-        if (startRef.current) {
-          setSortTime(Date.now() - startRef.current);
-        }
+        if (startRef.current) setSortTime(Date.now() - startRef.current);
       }, 10);
     } else if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
+      if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [running, setSortTime, resetSortTime]);
 }
